@@ -1,63 +1,37 @@
-import User from "../models/UserModel.js";
+import Users from "../models/UserModel.js";
+import argon2 from "argon2";
 
-// 1. GET ALL USERS (Mengambil semua data)
-export const getUsers = async (req, res) => {
+// 1. Ambil semua data user (Buat admin nanti)
+export const getUsers = async(req, res) => {
     try {
-        const response = await User.findAll();
-        res.status(200).json(response);
-    } catch (error) {
-        console.log(error.message);
-    }
-}
-
-// 2. GET USER BY ID (Mengambil 1 user berdasarkan ID)
-export const getUserById = async (req, res) => {
-    try {
-        const response = await User.findOne({
-            where: {
-                id: req.params.id
-            }
+        const response = await Users.findAll({
+            attributes: ['uuid', 'name', 'email', 'role'] // Password jangan ditampilin
         });
         res.status(200).json(response);
     } catch (error) {
-        console.log(error.message);
+        res.status(500).json({msg: error.message});
     }
 }
 
-// 3. CREATE USER (Menambah user baru)
-export const createUser = async (req, res) => {
-    try {
-        await User.create(req.body);
-        res.status(201).json({msg: "User Created"});
-    } catch (error) {
-        console.log(error.message);
-    }
-}
+// 2. Buat User Baru (Register)
+export const createUser = async(req, res) => {
+    const {name, email, password, confPassword, role} = req.body;
 
-// 4. UPDATE USER (Mengedit data user)
-export const updateUser = async (req, res) => {
+    // Validasi password
+    if(password !== confPassword) return res.status(400).json({msg: "Password dan Confirm Password tidak cocok"});
+
+    // Hash password
+    const hashPassword = await argon2.hash(password);
+
     try {
-        await User.update(req.body, {
-            where: {
-                id: req.params.id
-            }
+        await Users.create({
+            name: name,
+            email: email,
+            password: hashPassword,
+            role: role || "seeker" // Default jadi pencari kerja
         });
-        res.status(200).json({msg: "User Updated"});
+        res.status(201).json({msg: "Register Berhasil"});
     } catch (error) {
-        console.log(error.message);
-    }
-}
-
-// 5. DELETE USER (Menghapus user)
-export const deleteUser = async (req, res) => {
-    try {
-        await User.destroy({
-            where: {
-                id: req.params.id
-            }
-        });
-        res.status(200).json({msg: "User Deleted"});
-    } catch (error) {
-        console.log(error.message);
+        res.status(400).json({msg: error.message});
     }
 }
