@@ -2,7 +2,8 @@ import express from "express";
 import cors from "cors";
 import db from "./config/database.js";
 import UserRoute from "./routes/UserRoute.js";
-import JobRoute from "./routes/JobRoute.js"; // <-- TAMBAHAN 1
+import JobRoute from "./routes/JobRoute.js";
+import AppRoute from "./routes/AppRoute.js"; // <-- TAMBAHAN 1
 
 import "./models/UserModel.js";
 import "./models/JobModel.js";
@@ -15,7 +16,6 @@ const port = 5000;
     try {
         await db.authenticate();
         console.log('Database Connected...');
-        // await db.sync(); // Udah dimatiin karena tabel udah ada
     } catch (error) {
         console.error('Connection Error:', error);
     }
@@ -25,6 +25,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use(UserRoute);
-app.use(JobRoute); // <-- TAMBAHAN 2
+app.use(JobRoute);
+app.use(AppRoute); // <-- TAMBAHAN 2
 
 app.listen(port, () => console.log(`Server running at http://localhost:${port}`));
