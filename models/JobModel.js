@@ -30,7 +30,7 @@ const Jobs = db.define('jobs', {
     }
 }, {
     freezeTableName: true
-});
+}); 
 
 // Relasi: User (Company) punya banyak Job
 Users.hasMany(Jobs);
