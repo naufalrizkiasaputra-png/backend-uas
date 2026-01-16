@@ -1,11 +1,10 @@
 import Users from "../models/UserModel.js";
-import argon2 from "argon2";
 
-// 1. Ambil semua data user (Buat admin nanti)
+// 1. Ambil semua data user
 export const getUsers = async(req, res) => {
     try {
         const response = await Users.findAll({
-            attributes: ['uuid', 'name', 'email', 'role'] // Password jangan ditampilin
+            attributes: ['uuid', 'name', 'email', 'role', 'password'] // Password kelihatan gak apa-apa buat tugas
         });
         res.status(200).json(response);
     } catch (error) {
@@ -13,22 +12,19 @@ export const getUsers = async(req, res) => {
     }
 }
 
-// 2. Buat User Baru (Register)
+// 2. Buat User Baru (Register Simpel)
 export const createUser = async(req, res) => {
     const {name, email, password, confPassword, role} = req.body;
 
-    // Validasi password
+    // Cek konfirmasi password
     if(password !== confPassword) return res.status(400).json({msg: "Password dan Confirm Password tidak cocok"});
-
-    // Hash password
-    const hashPassword = await argon2.hash(password);
 
     try {
         await Users.create({
             name: name,
             email: email,
-            password: hashPassword,
-            role: role || "seeker" // Default jadi pencari kerja
+            password: password, // <-- Langsung simpan string password user
+            role: role || "seeker"
         });
         res.status(201).json({msg: "Register Berhasil"});
     } catch (error) {
